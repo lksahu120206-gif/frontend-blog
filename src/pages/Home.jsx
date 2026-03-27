@@ -1,135 +1,95 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../contexts/AuthContext'
 import api from '../services/api'
 import { toast } from 'react-toastify'
-import PostCard from '../components/PostCard'
 
 export default function Home() {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
-  const [page, setPage] = useState(1)
-  const [error, setError] = useState(false)
-  const [showEmptyState, setShowEmptyState] = useState(false)
+  const { user, logout } = useAuth()
   const navigate = useNavigate()
 
-  const fetchPosts = useCallback(async (pageNum = 1) => {
+  // Fetch posts the moment the page loads
+  useEffect(() => {
+    fetchPosts()
+  }, [])
+
+  const fetchPosts = async () => {
     try {
-      const res = await api.get(`/posts/?page=${pageNum}`)
-      if (pageNum === 1) {
-        setPosts(res.data.results || [])
-        setShowEmptyState(res.data.results?.length === 0)
-      } else {
-        setPosts(prev => [...prev, ...(res.data.results || [])])
-      }
-      setError(false)
+      // NOTE: Make sure '/posts/' matches your exact Django urls.py endpoint!
+      const response = await api.get('/posts/') 
+      setPosts(response.data)
     } catch (error) {
-      setError(true)
-      toast.error('Failed to load posts')
+      console.error("Error fetching posts:", error)
+      toast.error("Failed to load blog posts")
     } finally {
       setLoading(false)
     }
-  }, [])
-
-  useEffect(() => {
-    fetchPosts(1)
-  }, [fetchPosts])
-
-  const loadMore = () => {
-    const nextPage = page + 1
-    setPage(nextPage)
-    fetchPosts(nextPage)
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center py-12 px-4 bg-gradient-to-br from-indigo-50 to-purple-50">
-        <div className="text-center max-w-md">
-          <div className="w-24 h-24 mx-auto mb-6 bg-red-100 rounded-2xl flex items-center justify-center">
-            <svg className="w-12 h-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Unable to load posts</h1>
-          <p className="text-lg text-gray-600 mb-8">Backend might be offline. Please check back later.</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-all"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  if (loading && posts.length === 0) {
-    return (
-      <div className="min-h-screen flex items-center justify-center py-12 px-4 bg-gradient-to-br from-indigo-50 to-purple-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600">Loading posts...</p>
-        </div>
-      </div>
-    )
+  // Handle the Logout cycle
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+    toast.info("Logged out successfully")
   }
 
   return (
-    <div className="py-12 px-4">
-      {/* Hero Section */}
-      <section className="text-center mb-20 max-w-4xl mx-auto">
-        <h1 className="text-5xl md:text-6xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-6">
-          Welcome to Blog Platform
-        </h1>
-        <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-2xl mx-auto leading-relaxed">
-          Share your thoughts with the world. Connect with readers and writers.
-        </p>
-        <button 
-          onClick={() => navigate('/signup')}
-          className="px-12 py-5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-lg font-semibold rounded-2xl shadow-2xl hover:shadow-3xl hover:from-indigo-700 hover:to-purple-700 transition-all duration-300"
-        >
-          Get Started
-        </button>
-      </section>
-
-      {/* Posts Section */}
-      <section className="max-w-6xl mx-auto">
-        <div className="flex flex-col md:grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {posts.length === 0 && !loading ? (
-            <div className="md:col-span-full text-center py-24">
-              <div className="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-gray-100 to-gray-200 rounded-3xl flex items-center justify-center">
-                <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-              </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">No posts yet</h2>
-              <p className="text-lg text-gray-600 mb-8">Be the first to create one and share your thoughts!</p>
-              <button 
-                onClick={() => navigate('/create')}
-                className="px-8 py-3 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 transition-all"
-              >
-                Create First Post
-              </button>
-            </div>
-          ) : (
-            posts.map(post => (
-              <PostCard key={post.id} post={post} />
-            ))
-          )}
-        </div>
-        
-        {posts.length > 0 && (
-          <div className="text-center mt-16">
+    <div className="min-h-screen bg-gray-50">
+      {/* Navigation Bar */}
+      <nav className="bg-white shadow-sm border-b border-gray-200 px-4 py-3">
+        <div className="max-w-5xl mx-auto flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-indigo-600">BlogPlatform</h1>
+          
+          <div className="flex items-center gap-4">
+            <span className="text-gray-600 font-medium">
+              Hello, {user?.username || 'Guest'}
+            </span>
             <button 
-              onClick={loadMore}
-              className="btn-primary px-12 py-4 rounded-2xl font-semibold text-lg shadow-xl hover:shadow-2xl transition-all"
-              disabled={loading}
+              onClick={handleLogout}
+              className="text-sm font-semibold text-red-600 hover:text-red-800 transition-colors bg-red-50 hover:bg-red-100 px-4 py-2 rounded-lg"
             >
-              {loading ? 'Loading...' : 'Load More Posts'}
+              Logout
             </button>
           </div>
+        </div>
+      </nav>
+
+      {/* Main Content Area */}
+      <main className="max-w-5xl mx-auto px-4 py-8">
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-900">Latest Posts</h2>
+          <button className="bg-indigo-600 text-white px-5 py-2 rounded-xl font-semibold hover:bg-indigo-700 shadow-md transition-all">
+            + New Post
+          </button>
+        </div>
+
+        {/* Loading State */}
+        {loading ? (
+          <div className="flex justify-center items-center py-20">
+            <span className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></span>
+          </div>
+        ) : posts.length === 0 ? (
+          /* Empty State */
+          <div className="text-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
+            <p className="text-gray-500 text-lg">No posts yet. Be the first to write something!</p>
+          </div>
+        ) : (
+          /* Blog Post Grid */
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {posts.map((post) => (
+              <article key={post.id} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{post.title}</h3>
+                <p className="text-gray-600 mb-4 line-clamp-3">{post.content}</p>
+                <div className="text-sm text-gray-400 mt-auto pt-4 border-t border-gray-50">
+                  Posted by {post.author || 'Anonymous'}
+                </div>
+              </article>
+            ))}
+          </div>
         )}
-      </section>
+      </main>
     </div>
   )
 }
-
