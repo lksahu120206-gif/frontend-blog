@@ -42,10 +42,20 @@ export function AuthProvider({ children }) {
 
   const signup = async (userData) => {
     try {
-      await api.post('/signup/', userData)
-      return true
+      await api.post('/signup/', userData) 
+      return { success: true }
     } catch (error) {
-      return false
+      // Extract the exact error message Django sends back
+      let errorMessage = "Signup failed. Please try again."
+      if (error.response && error.response.data) {
+        const data = error.response.data
+        // Django usually returns errors like { username: ["User already exists"] }
+        const firstKey = Object.keys(data)[0]
+        if (firstKey) {
+          errorMessage = `${firstKey.toUpperCase()}: ${data[firstKey]}`
+        }
+      }
+      return { success: false, error: errorMessage }
     }
   }
 
