@@ -22,7 +22,10 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const isAuthRoute = error.config.url.includes('/token/') || error.config.url.includes('/login');
+    
+    // Only force a reload if they get a 401 on a normal page, NOT on the login page
+    if (error.response?.status === 401 && !isAuthRoute) {
       localStorage.removeItem('token')
       window.location.href = '/login'
     }

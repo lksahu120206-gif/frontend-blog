@@ -33,8 +33,10 @@ export function AuthProvider({ children }) {
       api.defaults.headers.common['Authorization'] = `Bearer ${res.data.access}`
       setUser({ username })
       return true
-    } catch (error) {
-      return false
+    }  catch (error) {
+      console.error("LOGIN API ERROR:", error); 
+      return false;
+    }
     }
   }
 
