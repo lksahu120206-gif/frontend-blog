@@ -19,13 +19,10 @@ export default function Signup() {
 
     setLoading(true)
 
-    // Wait for the new object response from AuthContext
     const response = await signup({
       username: formData.username,
       email: formData.email,
       password: formData.password,
-      // Note: Make sure your Django backend is actually expecting 'password2', 
-      // some backends expect 're_password' or just ignore the second one!
       password2: formData.password2 
     })
 
@@ -33,26 +30,7 @@ export default function Signup() {
       toast.success('Account created! Please login.')
       navigate('/login')
     } else {
-      // Show the EXACT error Django sent us!
       toast.error(response.error)
-    }
-    
-    setLoading(false)
-  }
-    setLoading(true)
-
-    const success = await signup({
-      username: formData.username,
-      email: formData.email,
-      password: formData.password,
-      password2: formData.password2
-    })
-
-    if (success) {
-      toast.success('Account created! Please login.')
-      navigate('/login')
-    } else {
-      toast.error('Signup failed. Please try again.')
     }
     
     setLoading(false)
