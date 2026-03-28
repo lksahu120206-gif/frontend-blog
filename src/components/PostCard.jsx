@@ -12,7 +12,7 @@ export default function PostCard({ post, onVote }) {
 
   const handleVote = async (voteType) => {
     try {
-      await api.post(`/posts/${post.id}/vote/`, { vote_type: voteType })
+      await api.post(`/api/posts/${post.id}/vote/`, { vote_type: voteType })
       setVotes({
         likes: voteType === 'like' ? votes.likes + 1 : votes.likes,
         dislikes: voteType === 'dislike' ? votes.dislikes + 1 : votes.dislikes,

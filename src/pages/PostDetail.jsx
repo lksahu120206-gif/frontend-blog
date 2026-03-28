@@ -14,11 +14,11 @@ export default function PostDetail() {
     const fetchPost = async () => {
       try {
         const [postRes, commentsRes] = await Promise.all([
-          api.get(`/posts/${id}/`),
-          api.get(`/posts/${id}/comments/`)
+          api.get(`/api/posts/${id}/`),
+          api.get(`/api/posts/${id}/comments/`)
         ])
         setPost(postRes.data)
-        setComments(commentsRes.data)
+        setComments(commentsRes.data.results || commentsRes.data)
       } catch (error) {
         toast.error('Post not found')
       } finally {
@@ -40,7 +40,7 @@ export default function PostDetail() {
 
   const addComment = async (content) => {
     try {
-      const res = await api.post(`/posts/${id}/comments/`, { content })
+      const res = await api.post(`/api/posts/${id}/comments/`, { content })
       setComments([res.data, ...comments])
       toast.success('Comment added!')
     } catch (error) {

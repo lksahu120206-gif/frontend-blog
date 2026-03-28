@@ -13,7 +13,7 @@ export default function CreatePost() {
     setLoading(true)
 
     try {
-      await api.post('/posts/', formData)
+      await api.post('/api/posts/', formData)
       toast.success('Post created successfully!')
       navigate('/')
     } catch (error) {

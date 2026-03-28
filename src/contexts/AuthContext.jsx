@@ -16,7 +16,7 @@ export function AuthProvider({ children }) {
     if (token) {
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`
       // Verify token
-      api.get('/token/verify/').then(res => {
+      api.get('/api/token/verify/').then(res => {
         setUser({ username: res.data.user || 'User' })
       }).catch(() => {
         localStorage.removeItem('token')
@@ -28,7 +28,7 @@ export function AuthProvider({ children }) {
 
   const login = async (username, password) => {
     try {
-      const res = await api.post('/token/', { username, password })
+      const res = await api.post('/api/token/', { username, password })
       localStorage.setItem('token', res.data.access)
       api.defaults.headers.common['Authorization'] = `Bearer ${res.data.access}`
       setUser({ username })
@@ -41,7 +41,7 @@ export function AuthProvider({ children }) {
 
   const signup = async (userData) => {
     try {
-      await api.post('/signup/', userData) 
+      await api.post('/api/signup/', userData) 
       return { success: true }
     } catch (error) {
       let errorMessage = "Signup failed. Please try again."

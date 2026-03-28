@@ -16,17 +16,16 @@ export default function Home() {
   }, [])
 
   const fetchPosts = async () => {
-    try {
-      // NOTE: Make sure '/posts/' matches your exact Django urls.py endpoint!
-      const response = await api.get('/posts/') 
-      setPosts(response.data)
-    } catch (error) {
-      console.error("Error fetching posts:", error)
-      toast.error("Failed to load blog posts")
-    } finally {
-      setLoading(false)
-    }
+  try {
+    const response = await api.get('/api/posts/') 
+    setPosts(response.data.results)  // ← change this line
+  } catch (error) {
+    console.error("Error fetching posts:", error)
+    toast.error("Failed to load blog posts")
+  } finally {
+    setLoading(false)
   }
+}
 
   // Handle the Logout cycle
   const handleLogout = () => {
