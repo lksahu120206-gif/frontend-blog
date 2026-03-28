@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import api from '../services/api'
 import { toast } from 'react-toastify'
@@ -9,14 +9,16 @@ export default function Home() {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
   const { user } = useAuth()
+  const location = useLocation() // ✅ detect navigation state
 
   useEffect(() => {
     fetchPosts()
-  }, [])
+  }, [location]) // ✅ refetch whenever we navigate back here
 
   const fetchPosts = async () => {
+    setLoading(true)
     try {
-      const response = await api.get('/api/posts/')
+      const response = await api.get('/posts/')
       setPosts(response.data.results || response.data)
     } catch (error) {
       console.error("Error fetching posts:", error)
@@ -31,10 +33,7 @@ export default function Home() {
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-3xl font-bold text-gray-900">Latest Posts</h2>
         {user && (
-          <Link
-            to="/create"
-            className="bg-indigo-600 text-white px-5 py-2 rounded-xl font-semibold hover:bg-indigo-700 shadow-md transition-all"
-          >
+          <Link to="/create" className="bg-indigo-600 text-white px-5 py-2 rounded-xl font-semibold hover:bg-indigo-700 shadow-md transition-all">
             + New Post
           </Link>
         )}

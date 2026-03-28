@@ -22,7 +22,7 @@ export default function PostCard({ post }) {
       return
     }
     try {
-      await api.post(`/api/posts/${post.id}/vote/`, { vote: voteValue })
+      await api.post(`/posts/${post.id}/vote/`, { vote: voteValue })
       setVotes(prev => ({
         likes: voteValue === 1
           ? prev.likes + 1

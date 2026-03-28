@@ -17,8 +17,8 @@ export default function PostDetail() {
     const fetchPost = async () => {
       try {
         const [postRes, commentsRes] = await Promise.all([
-          api.get(`/api/posts/${id}/`),
-          api.get(`/api/posts/${id}/comments/`)
+          api.get(`/posts/${id}/`),
+          api.get(`/posts/${id}/comments/`)
         ])
         setPost(postRes.data)
         setVotes({
@@ -42,7 +42,7 @@ export default function PostDetail() {
       return
     }
     try {
-      await api.post(`/api/posts/${id}/vote/`, { vote: voteValue })
+      await api.post(`/posts/${id}/vote/`, { vote: voteValue })
       setVotes(prev => ({
         likes: voteValue === 1 ? prev.likes + 1 : prev.likes,
         dislikes: voteValue === -1 ? prev.dislikes + 1 : prev.dislikes,
@@ -60,7 +60,7 @@ export default function PostDetail() {
       return
     }
     try {
-      const res = await api.post(`/api/posts/${id}/comments/`, { content })
+      const res = await api.post(`/posts/${id}/comments/`, { content })
       setComments([res.data, ...comments])
       toast.success('Comment added!')
     } catch (error) {
