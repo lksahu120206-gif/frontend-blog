@@ -17,7 +17,7 @@ export function AuthProvider({ children }) {
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`
       // Verify token
       api.get('/token/verify/').then(res => {
-        setUser({ username: res.data.user })
+        setUser({ username: res.data.user || 'User' })
       }).catch(() => {
         localStorage.removeItem('token')
       }).finally(() => setLoading(false))
@@ -33,10 +33,9 @@ export function AuthProvider({ children }) {
       api.defaults.headers.common['Authorization'] = `Bearer ${res.data.access}`
       setUser({ username })
       return true
-    }  catch (error) {
-      console.error("LOGIN API ERROR:", error); 
-      return false;
-    }
+    } catch (error) {
+      console.error("LOGIN API ERROR:", error);
+      return false
     }
   }
 
@@ -45,11 +44,9 @@ export function AuthProvider({ children }) {
       await api.post('/signup/', userData) 
       return { success: true }
     } catch (error) {
-      // Extract the exact error message Django sends back
       let errorMessage = "Signup failed. Please try again."
       if (error.response && error.response.data) {
         const data = error.response.data
-        // Django usually returns errors like { username: ["User already exists"] }
         const firstKey = Object.keys(data)[0]
         if (firstKey) {
           errorMessage = `${firstKey.toUpperCase()}: ${data[firstKey]}`
